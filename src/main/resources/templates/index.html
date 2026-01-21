@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carga de Archivos CSV</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+    <div class="container">
+        <h1>📂 Carga de Archivos CSV</h1>
+        
+        <!-- Mensajes de alerta -->
+        <div th:if="${error}" class="alert alert-error">
+            ❌ <span th:text="${error}"></span>
+        </div>
+        
+        <div th:if="${exito}" class="alert alert-success">
+            ✅ <span th:text="${exito}"></span>
+        </div>
+        
+        <div th:if="${advertencia}" class="alert alert-warning">
+            ⚠️ <span th:text="${advertencia}"></span>
+        </div>
+        
+        <!-- Formulario de subida -->
+        <form class="upload-form" method="post" action="/upload-csv" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="file">Selecciona un archivo CSV:</label>
+                <input type="file" id="file" name="file" accept=".csv" required>
+            </div>
+            <button type="submit">📤 Subir y Procesar CSV</button>
+        </form>
+        
+        <!-- Resultados del procesamiento -->
+        <div class="results" th:if="${registrosExitosos != null}">
+            <div class="stats">
+                <div class="stat-box success">
+                    <div class="stat-number" th:text="${registrosExitosos}">0</div>
+                    <div class="stat-label">Registros Guardados</div>
+                </div>
+                <div class="stat-box error">
+                    <div class="stat-number" th:text="${totalErrores}">0</div>
+                    <div class="stat-label">Errores Encontrados</div>
+                </div>
+            </div>
+            
+            <!-- Lista de errores detallada -->
+            <div class="error-list" th:if="${errores != null && !errores.isEmpty()}">
+                <h3>📋 Detalle de Errores:</h3>
+                <ul>
+                    <li th:each="error : ${errores}" th:text="${error}"></li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Información sobre el formato CSV -->
+        <div class="info-box">
+            <p><strong>ℹ️ Formato del archivo CSV:</strong></p>
+            <p>• Primera línea: nombre,email,telefono,direccion,empresa</p>
+            <p>• Campos obligatorios: nombre, email, empresa</p>
+            <p>• El email debe ser único (no duplicado)</p>
+            <p>• Ejemplo: Juan Pérez,juan@example.com,612345678,Calle Mayor 1,Empresa A</p>
+        </div>
+    </div>
+</body>
+</html>
