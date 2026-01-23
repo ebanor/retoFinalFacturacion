@@ -1,6 +1,6 @@
 package com.mikeldi.demo.service;
 
-import com.mikeldi.demo.repository.ClienteRepository;
+import com.mikeldi.demo.repository.FacturaVentaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -16,10 +16,10 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class ClienteService {
+public class FacturaVentaService {
     
     @Autowired
-    private ClienteRepository clienteRepository;
+    private FacturaVentaRepository facturaVentaRepository;
     
     private final ObjectMapper objectMapper = new ObjectMapper();
     
@@ -33,7 +33,7 @@ public class ClienteService {
             Files.copy(file.getInputStream(), tempFile, StandardCopyOption.REPLACE_EXISTING);
             
             // Obtener ruta del script Python
-            ClassPathResource scriptResource = new ClassPathResource("scripts/procesar_csv.py");
+            ClassPathResource scriptResource = new ClassPathResource("scripts/procesar_facturas.py");
             String scriptPath = scriptResource.getFile().getAbsolutePath();
             
             // Ejecutar Python con ProcessBuilder
