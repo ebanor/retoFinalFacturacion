@@ -3,6 +3,9 @@ package com.mikeldi.demo.entity;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 
+/**
+ * Entidad que representa una Factura de Venta
+ */
 @Entity
 @Table(name = "facturaventa")
 public class FacturaVenta {
@@ -47,8 +50,10 @@ public class FacturaVenta {
     @Column(name = "usuarioEmisorId")
     private Long usuarioEmisorId;
     
+    // Constructor vacío
     public FacturaVenta() {}
     
+    // Constructor con parámetros
     public FacturaVenta(String numeroFactura, String serie, Long pedidoId, Long clienteId, 
                        String fechaEmision, String fechaVencimiento, String estadoPago,
                        BigDecimal baseImponible, BigDecimal ivaTotal, BigDecimal totalFactura,
@@ -68,42 +73,108 @@ public class FacturaVenta {
     }
     
     // Getters y Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
     
-    public String getNumeroFactura() { return numeroFactura; }
-    public void setNumeroFactura(String numeroFactura) { this.numeroFactura = numeroFactura; }
+    public Long getId() { 
+        return id; 
+    }
     
-    public String getSerie() { return serie; }
-    public void setSerie(String serie) { this.serie = serie; }
+    public void setId(Long id) { 
+        this.id = id; 
+    }
     
-    public Long getPedidoId() { return pedidoId; }
-    public void setPedidoId(Long pedidoId) { this.pedidoId = pedidoId; }
+    public String getNumeroFactura() { 
+        return numeroFactura; 
+    }
     
-    public Long getClienteId() { return clienteId; }
-    public void setClienteId(Long clienteId) { this.clienteId = clienteId; }
+    public void setNumeroFactura(String numeroFactura) { 
+        this.numeroFactura = numeroFactura; 
+    }
     
-    public String getFechaEmision() { return fechaEmision; }
-    public void setFechaEmision(String fechaEmision) { this.fechaEmision = fechaEmision; }
+    public String getSerie() { 
+        return serie; 
+    }
     
-    public String getFechaVencimiento() { return fechaVencimiento; }
-    public void setFechaVencimiento(String fechaVencimiento) { this.fechaVencimiento = fechaVencimiento; }
+    public void setSerie(String serie) { 
+        this.serie = serie; 
+    }
     
-    public String getEstadoPago() { return estadoPago; }
-    public void setEstadoPago(String estadoPago) { this.estadoPago = estadoPago; }
+    public Long getPedidoId() { 
+        return pedidoId; 
+    }
     
-    public BigDecimal getBaseImponible() { return baseImponible; }
-    public void setBaseImponible(BigDecimal baseImponible) { this.baseImponible = baseImponible; }
+    public void setPedidoId(Long pedidoId) { 
+        this.pedidoId = pedidoId; 
+    }
     
-    public BigDecimal getIvaTotal() { return ivaTotal; }
-    public void setIvaTotal(BigDecimal ivaTotal) { this.ivaTotal = ivaTotal; }
+    public Long getClienteId() { 
+        return clienteId; 
+    }
     
-    public BigDecimal getTotalFactura() { return totalFactura; }
-    public void setTotalFactura(BigDecimal totalFactura) { this.totalFactura = totalFactura; }
+    public void setClienteId(Long clienteId) { 
+        this.clienteId = clienteId; 
+    }
     
-    public String getMoneda() { return moneda; }
-    public void setMoneda(String moneda) { this.moneda = moneda; }
+    public String getFechaEmision() { 
+        return fechaEmision; 
+    }
     
-    public Long getUsuarioEmisorId() { return usuarioEmisorId; }
-    public void setUsuarioEmisorId(Long usuarioEmisorId) { this.usuarioEmisorId = usuarioEmisorId; }
+    public void setFechaEmision(String fechaEmision) { 
+        this.fechaEmision = fechaEmision; 
+    }
+    
+    public String getFechaVencimiento() { 
+        return fechaVencimiento; 
+    }
+    
+    public void setFechaVencimiento(String fechaVencimiento) { 
+        this.fechaVencimiento = fechaVencimiento; 
+    }
+    
+    public String getEstadoPago() { 
+        return estadoPago; 
+    }
+    
+    public void setEstadoPago(String estadoPago) { 
+        this.estadoPago = estadoPago; 
+    }
+    
+    public BigDecimal getBaseImponible() { 
+        return baseImponible; 
+    }
+    
+    public void setBaseImponible(BigDecimal baseImponible) { 
+        this.baseImponible = baseImponible; 
+    }
+    
+    public BigDecimal getIvaTotal() { 
+        return ivaTotal; 
+    }
+    
+    public void setIvaTotal(BigDecimal ivaTotal) { 
+        this.ivaTotal = ivaTotal; 
+    }
+    
+    public BigDecimal getTotalFactura() { 
+        return totalFactura; 
+    }
+    
+    public void setTotalFactura(BigDecimal totalFactura) { 
+        this.totalFactura = totalFactura; 
+    }
+    
+    public String getMoneda() { 
+        return moneda; 
+    }
+    
+    public void setMoneda(String moneda) { 
+        this.moneda = moneda; 
+    }
+    
+    public Long getUsuarioEmisorId() { 
+        return usuarioEmisorId; 
+    }
+    
+    public void setUsuarioEmisorId(Long usuarioEmisorId) { 
+        this.usuarioEmisorId = usuarioEmisorId; 
+    }
 }

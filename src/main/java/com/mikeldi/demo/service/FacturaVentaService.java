@@ -15,6 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Servicio para procesar facturas desde archivos CSV usando Python
+ */
 @Service
 public class FacturaVentaService {
     
@@ -36,7 +39,7 @@ public class FacturaVentaService {
             ClassPathResource scriptResource = new ClassPathResource("scripts/procesar_facturas.py");
             String scriptPath = scriptResource.getFile().getAbsolutePath();
             
-            // Ejecutar Python con ProcessBuilder
+            // Ejecutar script Python
             ProcessBuilder processBuilder = new ProcessBuilder(
                 "python", 
                 scriptPath, 
@@ -45,7 +48,7 @@ public class FacturaVentaService {
             processBuilder.redirectErrorStream(true);
             Process process = processBuilder.start();
             
-            // Leer salida de Python (JSON con resultado)
+            // Leer salida JSON del script
             BufferedReader reader = new BufferedReader(
                 new InputStreamReader(process.getInputStream())
             );
@@ -56,11 +59,10 @@ public class FacturaVentaService {
                 output.append(line);
             }
             
-            // Esperar a que termine el proceso
             int exitCode = process.waitFor();
             
             if (exitCode == 0) {
-                // Parsear resultado JSON de Python
+                // Parsear resultado JSON
                 @SuppressWarnings("unchecked")
                 Map<String, Object> resultado = objectMapper.readValue(
                     output.toString(), 
@@ -79,7 +81,7 @@ public class FacturaVentaService {
                 errores.add("Salida: " + output.toString());
             }
             
-            // Limpiar archivo temporal
+            // Eliminar archivo temporal
             Files.deleteIfExists(tempFile);
             
         } catch (Exception e) {
@@ -90,6 +92,9 @@ public class FacturaVentaService {
         return new ResultadoProcesamiento(registrosExitosos, errores);
     }
     
+    /**
+     * Clase para encapsular el resultado del procesamiento
+     */
     public static class ResultadoProcesamiento {
         private int registrosExitosos;
         private List<String> errores;
