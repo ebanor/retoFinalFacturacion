@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carga de Archivos CSV</title>
+    <title>Carga de Facturas desde CSV</title>
     <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
 <body>
     <div class="container">
-        <h1>📂 Carga de Archivos CSV</h1>
+        <h1>📂 Carga de Facturas desde CSV</h1>
         
         <!-- Mensajes de alerta -->
         <div th:if="${error}" class="alert alert-error">
@@ -26,10 +26,10 @@
         <!-- Formulario de subida -->
         <form class="upload-form" method="post" action="/upload-csv" enctype="multipart/form-data">
             <div class="form-group">
-                <label for="file">Selecciona un archivo CSV:</label>
+                <label for="file">Selecciona un archivo CSV de facturas:</label>
                 <input type="file" id="file" name="file" accept=".csv" required>
             </div>
-            <button type="submit">📤 Subir y Procesar CSV</button>
+            <button type="submit">📤 Subir y Procesar Facturas</button>
         </form>
         
         <!-- Resultados del procesamiento -->
@@ -37,7 +37,7 @@
             <div class="stats">
                 <div class="stat-box success">
                     <div class="stat-number" th:text="${registrosExitosos}">0</div>
-                    <div class="stat-label">Registros Guardados</div>
+                    <div class="stat-label">Facturas Guardadas</div>
                 </div>
                 <div class="stat-box error">
                     <div class="stat-number" th:text="${totalErrores}">0</div>
@@ -56,11 +56,26 @@
         
         <!-- Información sobre el formato CSV -->
         <div class="info-box">
-            <p><strong>ℹ️ Formato del archivo CSV:</strong></p>
-            <p>• Primera línea: nombre,email,telefono,direccion,empresa</p>
-            <p>• Campos obligatorios: nombre, email, empresa</p>
-            <p>• El email debe ser único (no duplicado)</p>
-            <p>• Ejemplo: Juan Pérez,juan@example.com,612345678,Calle Mayor 1,Empresa A</p>
+            <p><strong>ℹ️ Formato del archivo CSV para Facturas de Venta:</strong></p>
+            <p><strong>Columnas requeridas:</strong></p>
+            <p style="font-family: monospace; font-size: 12px; background: #f0f0f0; padding: 8px; border-radius: 4px; overflow-x: auto;">
+                numeroFactura,serie,pedidoId,clienteId,fechaEmision,fechaVencimiento,estadoPago,baseImponible,ivaTotal,totalFactura,moneda,usuarioEmisorId
+            </p>
+            
+            <p><strong>Campos obligatorios:</strong> numeroFactura, serie, clienteId, fechaEmision, estadoPago, baseImponible, ivaTotal, totalFactura, moneda</p>
+            
+            <p><strong>Campos opcionales:</strong> pedidoId, fechaVencimiento, usuarioEmisorId</p>
+            
+            <p><strong>Estados de pago válidos:</strong> pendiente, pagada, parcial, vencida, anulada</p>
+            
+            <p><strong>Validación automática:</strong> totalFactura debe ser igual a baseImponible + ivaTotal</p>
+            
+            <p><strong>Formato de fechas:</strong> YYYY-MM-DD (ejemplo: 2026-01-15)</p>
+            
+            <p><strong>Ejemplo de línea válida:</strong></p>
+            <p style="font-family: monospace; font-size: 12px; background: #e7f3ff; padding: 8px; border-radius: 4px; overflow-x: auto;">
+                FAC-2026-001,A,1,1,2026-01-15,2026-02-15,pendiente,1000.00,210.00,1210.00,EUR,1
+            </p>
         </div>
     </div>
 </body>
