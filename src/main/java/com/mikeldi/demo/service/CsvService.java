@@ -1,7 +1,5 @@
 package com.mikeldi.demo.service;
 
-import com.mikeldi.demo.repository.ClienteRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,14 +14,11 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class ClienteService {
-    
-    @Autowired
-    private ClienteRepository clienteRepository;
+public class CsvService {
     
     private final ObjectMapper objectMapper = new ObjectMapper();
     
-    public ResultadoProcesamiento procesarCSV(MultipartFile file) {
+    public ResultadoProcesamiento procesarCSV(MultipartFile file, String tipoEntidad) {
         List<String> errores = new ArrayList<>();
         int registrosExitosos = 0;
         
@@ -33,14 +28,15 @@ public class ClienteService {
             Files.copy(file.getInputStream(), tempFile, StandardCopyOption.REPLACE_EXISTING);
             
             // Obtener ruta del script Python
-            ClassPathResource scriptResource = new ClassPathResource("scripts/procesar_csv.py");
+            ClassPathResource scriptResource = new ClassPathResource("scripts/procesar_csv_universal.py");
             String scriptPath = scriptResource.getFile().getAbsolutePath();
             
             // Ejecutar Python con ProcessBuilder
             ProcessBuilder processBuilder = new ProcessBuilder(
                 "python", 
                 scriptPath, 
-                tempFile.toString()
+                tempFile.toString(),
+                tipoEntidad  // Pasar el tipo de entidad (cliente, factura, etc.)
             );
             processBuilder.redirectErrorStream(true);
             Process process = processBuilder.start();

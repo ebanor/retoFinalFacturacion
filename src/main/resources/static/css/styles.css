@@ -164,3 +164,19 @@ button:hover {
     margin-bottom: 5px;
     color: #004085;
 }
+
+.error-list li {
+    padding: 12px;
+    margin-bottom: 8px;
+    background-color: white;
+    border-left: 3px solid #dc3545;
+    padding-left: 12px;
+    white-space: pre-line;
+    font-family: monospace;
+    line-height: 1.6;
+}
+
+.error-list li::first-line {
+    font-weight: bold;
+    font-family: Arial, sans-serif;
+}
