@@ -2,7 +2,6 @@ package com.mikeldi.demo.service;
 
 import com.mikeldi.demo.repository.FacturaVentaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,9 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Servicio para procesar facturas desde archivos CSV usando Python
- */
 @Service
 public class FacturaVentaService {
     
@@ -35,13 +31,19 @@ public class FacturaVentaService {
             Path tempFile = Files.createTempFile("upload_", ".csv");
             Files.copy(file.getInputStream(), tempFile, StandardCopyOption.REPLACE_EXISTING);
             
-            // Obtener ruta del script Python
-            ClassPathResource scriptResource = new ClassPathResource("scripts/procesar_facturas.py");
-            String scriptPath = scriptResource.getFile().getAbsolutePath();
+            // Ruta fija del script Python (fuera del JAR)
+            String scriptPath = "/app/scripts/procesar_facturas.py";
+            
+            // Verificar que el script existe
+            File scriptFile = new File(scriptPath);
+            if (!scriptFile.exists()) {
+                errores.add("Script Python no encontrado en: " + scriptPath);
+                return new ResultadoProcesamiento(0, errores);
+            }
             
             // Ejecutar script Python
             ProcessBuilder processBuilder = new ProcessBuilder(
-                "python", 
+                "python3",
                 scriptPath, 
                 tempFile.toString()
             );
@@ -92,9 +94,6 @@ public class FacturaVentaService {
         return new ResultadoProcesamiento(registrosExitosos, errores);
     }
     
-    /**
-     * Clase para encapsular el resultado del procesamiento
-     */
     public static class ResultadoProcesamiento {
         private int registrosExitosos;
         private List<String> errores;
