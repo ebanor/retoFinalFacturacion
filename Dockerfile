@@ -12,8 +12,8 @@ WORKDIR /app
 # Copiar el JAR generado
 COPY --from=build /app/target/*.jar app.jar
 
-# Copiar script Python
-COPY --from=build /app/src/main/resources/scripts /app/scripts
+# Copiar el script Python a una ubicación fija
+COPY --from=build /app/src/main/resources/scripts/procesar_facturas.py /app/scripts/procesar_facturas.py
 
 # Instalar Python y dependencias
 RUN apt-get update && \
