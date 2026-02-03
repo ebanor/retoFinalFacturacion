@@ -7,12 +7,11 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class FacturaVentaService {
@@ -21,71 +20,69 @@ public class FacturaVentaService {
     private FacturaVentaRepository facturaVentaRepository;
     
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private static final String INPUT_DIR = "/shared/input";
+    private static final String OUTPUT_DIR = "/shared/output";
     
     public ResultadoProcesamiento procesarCSV(MultipartFile file) {
         List<String> errores = new ArrayList<>();
         int registrosExitosos = 0;
         
         try {
-            // Guardar archivo temporalmente
-            Path tempFile = Files.createTempFile("upload_", ".csv");
-            Files.copy(file.getInputStream(), tempFile, StandardCopyOption.REPLACE_EXISTING);
+            // Generar ID único para este archivo
+            String uniqueId = UUID.randomUUID().toString();
+            Path inputFile = Paths.get(INPUT_DIR, uniqueId + ".csv");
+            Path outputFile = Paths.get(OUTPUT_DIR, uniqueId + "_result.json");
             
-            // Ruta fija del script Python (fuera del JAR)
-            String scriptPath = "/app/scripts/procesar_facturas.py";
+            // Crear directorios si no existen
+            Files.createDirectories(inputFile.getParent());
+            Files.createDirectories(outputFile.getParent());
             
-            // Verificar que el script existe
-            File scriptFile = new File(scriptPath);
-            if (!scriptFile.exists()) {
-                errores.add("Script Python no encontrado en: " + scriptPath);
+            // Guardar CSV en carpeta compartida
+            Files.copy(file.getInputStream(), inputFile, StandardCopyOption.REPLACE_EXISTING);
+            System.out.println("✅ CSV guardado en: " + inputFile);
+            
+            // Esperar a que Python procese (máximo 30 segundos)
+            int attempts = 0;
+            while (!Files.exists(outputFile) && attempts < 30) {
+                Thread.sleep(1000);
+                attempts++;
+                System.out.println("⏳ Esperando resultado... (" + attempts + "/30)");
+            }
+            
+            if (!Files.exists(outputFile)) {
+                errores.add("Timeout: El servicio Python no procesó el archivo en 30 segundos");
+                // Limpiar archivo de entrada
+                Files.deleteIfExists(inputFile);
                 return new ResultadoProcesamiento(0, errores);
             }
             
-            // Ejecutar script Python
-            ProcessBuilder processBuilder = new ProcessBuilder(
-                "python3",
-                scriptPath, 
-                tempFile.toString()
-            );
-            processBuilder.redirectErrorStream(true);
-            Process process = processBuilder.start();
+            // Leer resultado JSON
+            String jsonResult = Files.readString(outputFile);
+            System.out.println("📄 Resultado JSON: " + jsonResult);
             
-            // Leer salida JSON del script
-            BufferedReader reader = new BufferedReader(
-                new InputStreamReader(process.getInputStream())
-            );
-            
-            StringBuilder output = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                output.append(line);
+            if (jsonResult.trim().isEmpty()) {
+                errores.add("El script Python devolvió un resultado vacío");
+                return new ResultadoProcesamiento(0, errores);
             }
             
-            int exitCode = process.waitFor();
+            @SuppressWarnings("unchecked")
+            Map<String, Object> resultado = objectMapper.readValue(jsonResult, Map.class);
             
-            if (exitCode == 0) {
-                // Parsear resultado JSON
-                @SuppressWarnings("unchecked")
-                Map<String, Object> resultado = objectMapper.readValue(
-                    output.toString(), 
-                    Map.class
-                );
-                
-                registrosExitosos = (Integer) resultado.get("exitosos");
-                
-                @SuppressWarnings("unchecked")
-                List<String> erroresPython = (List<String>) resultado.get("errores");
-                if (erroresPython != null) {
-                    errores.addAll(erroresPython);
-                }
-            } else {
-                errores.add("Error al ejecutar script Python (código: " + exitCode + ")");
-                errores.add("Salida: " + output.toString());
+            registrosExitosos = (Integer) resultado.get("exitosos");
+            
+            @SuppressWarnings("unchecked")
+            List<String> erroresPython = (List<String>) resultado.get("errores");
+            if (erroresPython != null) {
+                errores.addAll(erroresPython);
             }
             
-            // Eliminar archivo temporal
-            Files.deleteIfExists(tempFile);
+            // Limpiar archivos temporales
+            Files.deleteIfExists(outputFile);
+            System.out.println("✅ Procesamiento completado: " + registrosExitosos + " registros");
             
+        } catch (InterruptedException e) {
+            errores.add("Proceso interrumpido: " + e.getMessage());
+            Thread.currentThread().interrupt();
         } catch (Exception e) {
             errores.add("Error al procesar archivo: " + e.getMessage());
             e.printStackTrace();

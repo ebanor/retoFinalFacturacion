@@ -1,44 +1,59 @@
 version: '3.8'
 
 services:
-  # Contenedor 1: Base de datos MySQL
   db:
     image: mysql:8.0
     container_name: reto_final_db
-    restart: unless-stopped
     environment:
       MYSQL_DATABASE: reto_final
       MYSQL_ROOT_PASSWORD: root
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - db_data:/var/lib/mysql
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
 
-  # Contenedor 2: Aplicación Spring Boot
+  python-processor:
+    build:
+      context: ./python-service
+    container_name: reto_final_python
+    volumes:
+      - shared-volume:/shared
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
+
   app:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: reto_final_app
-    restart: unless-stopped
     ports:
       - "8080:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/reto_final
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
+    volumes:
+      - shared-volume:/shared
     depends_on:
       - db
+      - python-processor
     networks:
       - app-network
 
-  # Contenedor 3: Servidor web NGINX
   nginx:
     image: nginx:alpine
     container_name: reto_final_nginx
-    restart: unless-stopped
     ports:
       - "80:80"
     volumes:
@@ -48,10 +63,26 @@ services:
     networks:
       - app-network
 
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: reto_final_phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: root
+      UPLOAD_LIMIT: 50M
+    depends_on:
+      - db
+    networks:
+      - app-network
+
 networks:
   app-network:
-    driver: bridge
 
 volumes:
   db_data:
-    driver: local
+  shared-volume:
